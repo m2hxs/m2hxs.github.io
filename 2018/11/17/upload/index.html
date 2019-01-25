@@ -1,0 +1,85 @@
+<!DOCTYPE html><head><meta name="generator" content="Hexo 3.8.0"><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="upload"><meta name="author" content="某邮大三web狗"><meta name="keywords" content=""><meta name="copyright" content="copyright.liscense_type"><title>Upload</title><!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+<!--[if lt IE 9]><script src="https://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script><script src="https://cdn.bootcss.com/respond/1.4.2/respond.min.js"></script><![endif]--><link rel="icon" href="/compass/imgs/favicon.ico"><link rel="stylesheet" href="/compass/stylesheets/font-awesome.min.css"><script>var algoliaConfig = {"on":false}</script><link rel="stylesheet" href="/compass/stylesheets/screen.css"></head><body><div id="body-inner-wrapper"><header id="page-header"><nav id="nav"><div id="site-name">m2hxs</div><i class="fa fa-bars fa-2x" id="nav-icon" aria-hidden="true"></i><div id="nav-expanded"><a class="nav-word-item" href="/">Home</a><a class="nav-word-item" href="/archives">Archives</a><a class="nav-word-item" href="/tags">Tags</a><a class="nav-word-item" href="/categories">Catogories</a></div><div id="nav-list"><ul><li><a class="nav-list-item" href="/">Home</a></li><li><a class="nav-list-item" href="/archives">Archives</a></li><li><a class="nav-list-item" href="/tags">Tags</a></li><li><a class="nav-list-item" href="/categories">Catogories</a></li></ul></div></nav><div id="banner-wrapper"><div id="banner-pagetype-dependent-info"><h1 id="post-title">Upload</h1><span id="post-description"><i class="fa fa-calendar" aria-hidden="true"></i> 2018-11-17</span><span id="word-count">The total word count - 1963</span><span id="time-count">Estimated time of reading - 7 mins</span></div></div><a title="Back to Top"><i class="fa fa-arrow-up" id="to-Top" aria-hidden="true"></i></a><a title="Click to Toggle off"><i class="fa fa-toggle-on" id="toggle-on-Toc" aria-hidden="true"></i></a><a title="Click to Toggle on"><i class="fa fa-toggle-off" id="toggle-off-Toc" aria-hidden="true"></i></a></header><aside id="toc-column"><div id="toc-column-inner-wrapper"><div id="post-toc"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#前言"><span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#最简单型的文件上传"><span class="toc-text">最简单型的文件上传</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#稍有难度型文件上传"><span class="toc-text">稍有难度型文件上传</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#高级别文件上传型"><span class="toc-text">高级别文件上传型</span></a></li></ol></div></div></aside><main id="main-content-column"><div id="main-content-wrapper"><div id="post-full-content"><p>我心有昆仑，住着漫天仙佛。</p>
+<a id="more"></a>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>搞搞文件上传，毕竟不管是CTF还是真实的渗透过程，上传是一个很重要的点，主要目的用于传马拿webshell。</p>
+<p>难点在于文件上传突破，但是怎么个突破法？这是个问题。但最直接，最有效的方式为：看源码，总结套路。</p>
+<h2 id="最简单型的文件上传"><a href="#最简单型的文件上传" class="headerlink" title="最简单型的文件上传"></a>最简单型的文件上传</h2><img src="/2018/11/17/upload/low.png" title="low级别源码">
+<p>php中<em>basename(path,suffix)</em>函数：</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>path</td>
+<td>必需。规定要检查的路径。</td>
+</tr>
+<tr>
+<td>suffix</td>
+<td>可选。规定文件扩展名。如果文件有 suffix，则不会输出这个扩展名。</td>
+</tr>
+</tbody>
+</table>
+<p>即：<em>suffix</em>参数是强制替换（或者补上）文件后缀名</p>
+<p>函数返回路径中的文件名部分，如果可选参数suffix为空，则返回的文件名包含后缀名，反之不包含后缀名。</p>
+<p>move_uploaded_file(file,newloc) 函数将上传的文件移动到新位置。</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>file</td>
+<td>必需。规定要移动的文件。</td>
+</tr>
+<tr>
+<td>newloc</td>
+<td>必需。规定文件的新位置。</td>
+</tr>
+</tbody>
+</table>
+<p>即未对上传对象有任何限制，只是上传之后检查文件生成路径。</p>
+<p>文件上传漏洞的利用是有限制条件的，首先当然是要能够成功上传木马文件，其次上传文件必须能够被执行，最后就是上传文件的路径必须可知。</p>
+<p>菜刀就会通过向服务器发送包含apple参数的post请求，在服务器上执行任意命令，获取webshell权限。</p>
+<p>可以下载、修改服务器的所有文件。</p>
+<h2 id="稍有难度型文件上传"><a href="#稍有难度型文件上传" class="headerlink" title="稍有难度型文件上传"></a>稍有难度型文件上传</h2><img src="/2018/11/17/upload/medium.png" title="中级别源码">
+<p>看见从上传的对象特征里，取出了文件type,name,size等进行判断</p>
+<p>然后对type和size进行了限制（只限制了img/jpeg类型，以及大小）</p>
+<p>直接进行文件包含（图片马）+文件上传，来获取webshell</p>
+<p>ps：直接传一句话，见文件名修改为xx.png 但是虽然可以突破上传，但是但是获取webshell后无论执行什么命令，都无法操作。</p>
+<p>原因：中国菜刀的原理是向上传文件发送包含apple参数的post请求，通过控制apple参数来执行不同的命令，而这里服务器将木马文件解析成了图片文件，因此向其发送post请求时，服务器只会返回这个“图片”文件，并不会执行相应命令。这里可以借助<strong>Medium级别的文件包含漏洞</strong>来获取webshell权限，打开中国菜刀，右键添加，在地址栏中输入</p>
+<p><a href="http://x.x.x.x/dvwa/vulnerabilities/fi/?page=hthttp://tp://192.168.32.136:88/DVWA/hackable/uploads/medium.png参数名为a" target="_blank" rel="noopener">http://x.x.x.x/dvwa/vulnerabilities/fi/?page=hthttp://tp://192.168.32.136:88/DVWA/hackable/uploads/medium.png参数名为a</a></p>
+<p>2.抓包修改文件类型,文件类型为image/png，并且修改filename为xx.php。(源码只对类型和大小做了限制，content-type已经是image/png，传png很难去执行，所以改包把png改成php)</p>
+<p>3.截断绕过：PHP的00截断是5.2.x版本的一个漏洞，当用户输入的url参数包含%00经过浏览器自动转码后截断后面字符。在php版本小于5.3.4的服务器中，当Magic_quote_gpc选项为off时，可以在文件名中使用00截断，所以可以把上传文件命名为medium.phpA00.png。</p>
+<p>主要是用于绕过后缀限制。比如要求上传png文件，但我们命名为xx.php%00.png 就可以绕过了</p>
+<p> 1）开启magic_quote_gpc=on之后，能实现addslshes()和stripslashes()这两个函数的功能。在PHP4.0及以上的版本中，该选项默认情况下是开启的（通过启用php.ini配置文件中的相关选项）。所以在PHP4.0及以上的版本中，就算PHP程序中的参数没有进行过滤，PHP系统也会对每一个通过GET、POST、COOKIE方式传递的变量自动转换，换句话说，输入的注入攻击代码将会全部被转换</p>
+<p>[<a href="https://www.cnblogs.com/hongfei/archive/2012/01/14/magic-sql-injection.html" target="_blank" rel="noopener">浅谈开启magic_quote_gpc后的sql注入攻与防</a></p>
+<p>2）具体原理是 系统在对文件名的读取时，如果遇到0x00，就会认为读取已结束。</p>
+<p>但要注意是文件的16进制内容里的00，而不是文件名中的00 ！就是说系统是按16进制读取文件（或者说二进制），遇到ascii码为零的位置就停止，而这个ascii码为零的位置在16进制中是00，用0x开头表示16进制，也就是所说的0x00截断。</p>
+<p><a href="https://blog.csdn.net/zpy1998zpy/article/details/80545408" target="_blank" rel="noopener">关于00截断的思考</a></p>
+<h2 id="高级别文件上传型"><a href="#高级别文件上传型" class="headerlink" title="高级别文件上传型"></a>高级别文件上传型</h2><img src="/2018/11/17/upload/high.png" title="高级别源码">
+<p><em>strrpos(string,find,start)</em></p>
+<p>函数返回字符串find在另一字符串string中最后一次出现的位置，如果没有找到字符串则返回false，可选参数start规定在何处开始搜索。</p>
+<p><em>getimagesize(string filename)</em></p>
+<p>函数会通过读取文件头，返回图片的长、宽等信息，如果没有相关的图片文件头，函数会报错。</p>
+<p>可以看到，High级别的代码读取文件名中最后一个”.”后的字符串，期望通过文件名来限制文件类型，因此要求上传文件名形式必须是”<em>.jpg”、”</em>.jpeg” 、”*.png”之一。同时，getimagesize函数更是限制了上传文件的文件头必须为图像类型。</p>
+<p>1.00截断可以绕过文件名的检查，但是要加上文件头的特征（图片+马的形式），前面是只修改文件名，通过hex或者url里使用00截断。</p>
+<p>2.图片包含，图片+马的形式上传，然后再通过url（文件包含）进行触发<a href="http://x.x.x.x/dvwa/vulnerabilities/fi/?page=file:///D:\phpStudy\WWW\DVWA\hackable\uploads**/**high.png" target="_blank" rel="noopener">http://x.x.x.x/dvwa/vulnerabilities/fi/?page=file:///D:\phpStudy\WWW\DVWA\hackable\uploads**/**high.png</a></p>
+<p>ps:之前通过page包含的，是在url里跳转，而这里是在绝对路径里跳转的，而最后一个/是相当于把前面的看作成了url的相对路径。</p>
+<p>二者前半操作是相同的，之后后面利用的漏洞不一样。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php </span><br><span class="line"></span><br><span class="line">if( isset( $_POST[ &apos;Upload&apos; ] ) ) &#123; </span><br><span class="line">    // Check Anti-CSRF token </span><br><span class="line">    checkToken( $_REQUEST[ &apos;user_token&apos; ], $_SESSION[ &apos;session_token&apos; ], &apos;index.php&apos; ); </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    // File information </span><br><span class="line">    $uploaded_name = $_FILES[ &apos;uploaded&apos; ][ &apos;name&apos; ]; </span><br><span class="line">    $uploaded_ext  = substr( $uploaded_name, strrpos( $uploaded_name, &apos;.&apos; ) + 1); </span><br><span class="line">    $uploaded_size = $_FILES[ &apos;uploaded&apos; ][ &apos;size&apos; ]; </span><br><span class="line">    $uploaded_type = $_FILES[ &apos;uploaded&apos; ][ &apos;type&apos; ]; </span><br><span class="line">    $uploaded_tmp  = $_FILES[ &apos;uploaded&apos; ][ &apos;tmp_name&apos; ]; </span><br><span class="line"></span><br><span class="line">    // Where are we going to be writing to? </span><br><span class="line">    $target_path   = DVWA_WEB_PAGE_TO_ROOT . &apos;hackable/uploads/&apos;; </span><br><span class="line">    //$target_file   = basename( $uploaded_name, &apos;.&apos; . $uploaded_ext ) . &apos;-&apos;; </span><br><span class="line">    $target_file   =  md5( uniqid() . $uploaded_name ) . &apos;.&apos; . $uploaded_ext; </span><br><span class="line">    $temp_file     = ( ( ini_get( &apos;upload_tmp_dir&apos; ) == &apos;&apos; ) ? ( sys_get_temp_dir() ) : ( ini_get( &apos;upload_tmp_dir&apos; ) ) ); </span><br><span class="line">    $temp_file    .= DIRECTORY_SEPARATOR . md5( uniqid() . $uploaded_name ) . &apos;.&apos; . $uploaded_ext; </span><br><span class="line"></span><br><span class="line">    // Is it an image? </span><br><span class="line">    if( ( strtolower( $uploaded_ext ) == &apos;jpg&apos; || strtolower( $uploaded_ext ) == &apos;jpeg&apos; || strtolower( $uploaded_ext ) == &apos;png&apos; ) &amp;&amp; </span><br><span class="line">        ( $uploaded_size &lt; 100000 ) &amp;&amp; </span><br><span class="line">        ( $uploaded_type == &apos;image/jpeg&apos; || $uploaded_type == &apos;image/png&apos; ) &amp;&amp; </span><br><span class="line">        getimagesize( $uploaded_tmp ) ) &#123; </span><br><span class="line">        // Strip any metadata, by re-encoding image (Note, using php-Imagick is recommended over php-GD) </span><br><span class="line">        if( $uploaded_type == &apos;image/jpeg&apos; ) &#123; </span><br><span class="line">            $img = imagecreatefromjpeg( $uploaded_tmp ); </span><br><span class="line">            imagejpeg( $img, $temp_file, 100); </span><br><span class="line">        &#125; </span><br><span class="line">        else &#123; </span><br><span class="line">            $img = imagecreatefrompng( $uploaded_tmp ); </span><br><span class="line">            imagepng( $img, $temp_file, 9); </span><br><span class="line">        &#125; </span><br><span class="line">        imagedestroy( $img ); </span><br><span class="line"></span><br><span class="line">        // Can we move the file to the web root from the temp folder? </span><br><span class="line">        if( rename( $temp_file, ( getcwd() . DIRECTORY_SEPARATOR . $target_path . $target_file ) ) ) &#123; </span><br><span class="line">            // Yes! </span><br><span class="line">            echo &quot;&lt;pre&gt;&lt;a href=&apos;$&#123;target_path&#125;$&#123;target_file&#125;&apos;&gt;$&#123;target_file&#125;&lt;/a&gt; succesfully uploaded!&lt;/pre&gt;&quot;; </span><br><span class="line">        &#125; </span><br><span class="line">        else &#123; </span><br><span class="line">            // No </span><br><span class="line">            echo &apos;&lt;pre&gt;Your image was not uploaded.&lt;/pre&gt;&apos;; </span><br><span class="line">        &#125; </span><br><span class="line"></span><br><span class="line">        // Delete any temp files </span><br><span class="line">        if( file_exists( $temp_file ) ) </span><br><span class="line">            unlink( $temp_file ); </span><br><span class="line">    &#125; </span><br><span class="line">    else &#123; </span><br><span class="line">        // Invalid file </span><br><span class="line">        echo &apos;&lt;pre&gt;Your image was not uploaded. We can only accept JPEG or PNG images.&lt;/pre&gt;&apos;; </span><br><span class="line">    &#125; </span><br><span class="line">&#125; </span><br><span class="line"></span><br><span class="line">// Generate Anti-CSRF token </span><br><span class="line">generateSessionToken(); </span><br><span class="line"></span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p><em>in_get(varname)</em></p>
+<p>函数返回相应选项的值</p>
+<p><em>imagecreatefromjpeg ( filename )</em></p>
+<p>函数返回图片文件的图像标识，失败返回false</p>
+<p><em>imagejpeg ( image , filename , quality)</em></p>
+<p>从image图像以filename为文件名创建一个JPEG图像，可选参数quality，范围从0（最差质量，文件更小）到100（最佳质量，文件最大）。</p>
+<p> <em>imagedestroy( img )</em></p>
+<p>函数销毁图像资源</p>
+</div></div></main><div id="pagination-wrapper"><a id="page-prev" href="/2019/01/25/long-time-no-see/"><i class="fa fa-chevron-left"></i> long time no see</a><a id="page-next" href="/2018/11/14/CSRF/">浅谈CSRF token cross-domain <i class="fa fa-chevron-right"></i></a></div><footer id="page-footer"><div id="footer-wrapper"><div id="blog-meta">&copy;2018-11-2019 By 某邮大三web狗 | Theme - <a id="theme-name" href="https://github.com/huan555/lemon-lime"> Lemon-Lime</a> | Power By <a id="theme-powered-by" href="null"> Hexo</a></div><div id="viewed-record"><script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script><span id="busuanzi_container_page_pv"><i class="fa fa-eye" aria-hidden="true"></i> <span id="busuanzi_value_page_pv"></span></span></div><div id="contact-me"><div id="rss"><a href="/atom.xml" type="application/atom+xml" rel="alternate" target="_blank"><i class="fa fa-rss" aria-hidden="true"></i></a></div><div id="email"><a href="mailto:xxs97694@163.com?Subject=blog"><i class="fa fa-envelope" aria-hidden="true"></i></a></div><span id="github"><a href="https://github.com/m2hxs"><i class="fa fa-github" aria-hidden="true"></i></a></span></div></div></footer><script src="/compass/js/blog.js"></script></div></body>
